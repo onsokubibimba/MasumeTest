@@ -9,9 +9,12 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.os.Handler;
 import android.provider.Telephony;
+import android.util.Pair;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+
+import java.util.ArrayList;
 
 /**
  * Created by user on 2015/03/09.
@@ -48,6 +51,7 @@ public class gamewindow extends SurfaceView implements SurfaceHolder.Callback{
     private int rectbottom;
 
     private remotesister oneesan;
+    private Arrows arrows;
 
 
     private final int SLEEPTIME = 50; // ミリセカンド
@@ -127,13 +131,18 @@ public class gamewindow extends SurfaceView implements SurfaceHolder.Callback{
             oneesan = new remotesister(charabitmap,vw,vh,CHARA_BLOCK_SIZE,map);
         }
 
+        if (arrows == null) {
+            arrows = new Arrows(getContext());
+
+        }
+
         boolean rt;
 
         if (movetype == 0) {
-            //こちらを有効にするとおねえさんが動く
+            //こちらが有効だとおねえさんが動く
             rt = oneesan.move(isMoving,direction);
         } else {
-            //以下を有効にするとマップが動く
+            //こっちが有効だとマップが動く
             rt = oneesan.movemap(isMoving,direction);
             isMoving = rt;
             if (isMoving) {
@@ -159,9 +168,17 @@ public class gamewindow extends SurfaceView implements SurfaceHolder.Callback{
         }
 
         isMoving = rt;
+
         map.drawMap(canvas);
         oneesan.draw(canvas);
 
+        if (!isMoving) {
+            ArrayList<Pair> arpair = map.getmovetolist(oneesan.horizontalPoint,oneesan.verticalPoint);
+            arrows.drawArrow(canvas,arpair,oneesan.horizontalPoint,oneesan.verticalPoint,
+                    oneesan.rect.left,oneesan.rect.top);
+
+
+        }
 
     }
 

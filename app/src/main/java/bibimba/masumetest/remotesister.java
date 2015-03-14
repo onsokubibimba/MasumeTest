@@ -174,4 +174,10 @@ Log.v("1回あたりの動き","サイズ" + movesize);
         }
         return isMoving;
     }
+
+
+    //移動先可能な方向の矢印を描画する
+    public void drawArrow() {
+
+    }
 }

@@ -5,7 +5,10 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.os.Handler;
+import android.util.Log;
+import android.util.Pair;
 
+import java.util.ArrayList;
 import java.util.Random;
 
 /**
@@ -47,6 +50,8 @@ public class Map implements remotesister.Callback{
 
     }
 
+
+    //方向はEnumに変換すればいいと思うけどめんどくさい
     private void MapMoveCalc(int direction) {
         switch (direction) {
             //0:下 1:左 2:右 3:上
@@ -109,6 +114,39 @@ public class Map implements remotesister.Callback{
 
     @Override
     public boolean canMoveMap(int fromX ,int fromY,int direction) {
+
+        Pair<Integer,Integer> tomasume;
+        switch (direction) {
+            case 0:
+                tomasume = Pair.create(fromX,fromY + 1);
+                break;
+            case 1:
+                tomasume = Pair.create(fromX - 1,fromY);
+                break;
+            case 2:
+                tomasume = Pair.create(fromX + 1,fromY);
+                break;
+            case 3:
+                tomasume = Pair.create(fromX,fromY - 1);
+                break;
+            default:
+                tomasume = Pair.create(fromX,fromY);
+                return false;
+        }
+
+/*
+        Log.v("ペア値","fromＸ:" + fromX + " fromＹ:" + fromY + " toＸ:" + tomasume.first + " toＹ:" + tomasume.second);
+        for (Pair test:block[fromY][fromX].canmovelistsArray) {
+            Log.v("ペア値"," toＸ:" + test.first + " toＹ:" + test.second);
+        }
+*/
+        if (block[fromY][fromX].canmovelistsArray.contains(tomasume)) {
+            return true;
+        } else {
+            return false;
+        }
+
+        /*
         switch (direction) {
             //0:下 1:左 2:右 3:上
             case 0:
@@ -139,10 +177,44 @@ public class Map implements remotesister.Callback{
                 break;
         }
         return true;
+        */
     }
 
     @Override
     public boolean canMoveOneesan(int fromX ,int fromY,int direction) {
+
+        Pair<Integer,Integer> tomasume;
+        switch (direction) {
+            case 0:
+                tomasume = Pair.create(fromX,fromY + 1);
+                break;
+            case 1:
+                tomasume = Pair.create(fromX - 1,fromY);
+                break;
+            case 2:
+                tomasume = Pair.create(fromX + 1,fromY);
+                break;
+            case 3:
+                tomasume = Pair.create(fromX,fromY - 1);
+                break;
+            default:
+                tomasume = Pair.create(fromX,fromY);
+                return false;
+        }
+
+/*
+        Log.v("ペア値","fromＸ:" + fromX + " fromＹ:" + fromY + " toＸ:" + tomasume.first + " toＹ:" + tomasume.second);
+        for (Pair test:block[fromY][fromX].canmovelistsArray) {
+            Log.v("ペア値"," toＸ:" + test.first + " toＹ:" + test.second);
+        }
+*/
+        if (block[fromY][fromX].canmovelistsArray.contains(tomasume)) {
+            return true;
+        } else {
+            return false;
+        }
+
+        /*
         switch (direction) {
             //0:下 1:左 2:右 3:上
             case 0:
@@ -172,10 +244,12 @@ public class Map implements remotesister.Callback{
                 }
                 break;
         }
-        return true;
+        */
+        //return true;
     }
 
     private void createMap() {
+
         block = new Block[verticalBlockNum][horizontalBlockNum];
         for (int y = 0; y < verticalBlockNum; y++) {
             for (int x = 0; x < horizontalBlockNum; x++) {
@@ -188,15 +262,45 @@ public class Map implements remotesister.Callback{
                 int bottom = top + blocksize - 2;
                 block[y][x] = new Block(type,left,top,right,bottom);
 
+                //各ブロックが移動可能な先を格納する
+                //移動先リストをデータベース化すればそこから読み込ませて格納させる
+                Pair<Integer,Integer> canmovelist = Pair.create(x-1,y);
+                block[y][x].canmovelistsArray.add(canmovelist);
+                Pair<Integer,Integer> canmovelist2 = Pair.create(x,y-1);
+                block[y][x].canmovelistsArray.add(canmovelist2);
+                Pair<Integer,Integer> canmovelist3 = Pair.create(x+1,y);
+                block[y][x].canmovelistsArray.add(canmovelist3);
+                Pair<Integer,Integer> canmovelist4 = Pair.create(x,y+1);
+                block[y][x].canmovelistsArray.add(canmovelist4);
+
+                if (x == 0) {
+                    block[y][x].canmovelistsArray.remove(canmovelist);
+                }
+                if (x == horizontalBlockNum - 1) {
+                    block[y][x].canmovelistsArray.remove(canmovelist3);
+                }
+                if (y == 0) {
+                    block[y][x].canmovelistsArray.remove(canmovelist2);
+                }
+                if (y == verticalBlockNum - 1) {
+                    block[y][x].canmovelistsArray.remove(canmovelist4);
+                }
+
+
             }
         }
     }
+
     void drawMap(Canvas canvas) {
         for (int y =0; y < verticalBlockNum; y++) {
             for (int x = 0 ; x < horizontalBlockNum; x++) {
                 block[y][x].draw(canvas);
             }
         }
+    }
+
+    public ArrayList<Pair> getmovetolist(int fromX,int fromY) {
+        return block[fromY][fromX].canmovelistsArray;
     }
 
     static class Block {
@@ -211,6 +315,8 @@ public class Map implements remotesister.Callback{
             PAINT_A.setColor(Color.GREEN);
             PAINT_B.setColor(Color.BLUE);
         }
+        public ArrayList<Pair> canmovelistsArray = new ArrayList<Pair>(3);
+
 
         private final int type;
         final Rect rect;
@@ -233,6 +339,10 @@ public class Map implements remotesister.Callback{
 
         private void draw(Canvas canvas) {
             canvas.drawRect(rect,getPaint());
+        }
+
+        public void setcanmovetolist() {
+
         }
 
     }
