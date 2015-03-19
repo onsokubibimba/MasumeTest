@@ -9,8 +9,10 @@ import android.view.SurfaceView;
 import android.view.Display;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CompoundButton;
+import android.widget.ListView;
 import android.widget.Switch;
 
 
@@ -19,7 +21,19 @@ public class MainActivity extends ActionBarActivity {
     private SurfaceView surfaceView;
     private gamewindow gv;
 
+    // メッセージ表示領域用のListView
+    private ListView lvLog;
+    private ArrayAdapter<String> lvLogItemsAdapter;
+
     private final int TESTI = 1;
+
+    // 宝箱の処理
+    private void checkChest() {
+        Item item = this.gv.openChest();
+        if (item != null) {
+            this.lvLogItemsAdapter.insert(item.getName() + "を手に入れた！", 0);
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,6 +58,10 @@ public class MainActivity extends ActionBarActivity {
             surfaceView.layout(0,0,size.x,size.y / 2);
             gv = new gamewindow(this,surfaceView);
 
+            this.lvLog = (ListView)findViewById(R.id.lvLog);
+            this.lvLogItemsAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1);
+            this.lvLog.setAdapter(this.lvLogItemsAdapter);
+
             Button btn = (Button)findViewById(R.id.button_up);
             btn.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -52,6 +70,7 @@ public class MainActivity extends ActionBarActivity {
                         gv.direction = 3;
                         gv.isMoving = true;
                     }
+                    checkChest();
 
                 }
             });
@@ -64,6 +83,7 @@ public class MainActivity extends ActionBarActivity {
                         gv.direction = 0;
                         gv.isMoving = true;
                     }
+                    checkChest();
 
                 }
             });
@@ -76,6 +96,7 @@ public class MainActivity extends ActionBarActivity {
                         gv.direction = 1;
                         gv.isMoving = true;
                     }
+                    checkChest();
                 }
             });
 
@@ -87,6 +108,7 @@ public class MainActivity extends ActionBarActivity {
                         gv.direction = 2;
                         gv.isMoving = true;
                     }
+                    checkChest();
                 }
             });
 

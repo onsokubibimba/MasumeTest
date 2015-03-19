@@ -180,4 +180,12 @@ Log.v("1回あたりの動き","サイズ" + movesize);
     public void drawArrow() {
 
     }
+
+    public int getHorizontalPoint() {
+        return horizontalPoint;
+    }
+
+    public int getVerticalPoint() {
+        return verticalPoint;
+    }
 }

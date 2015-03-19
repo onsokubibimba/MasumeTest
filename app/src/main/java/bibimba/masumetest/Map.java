@@ -9,6 +9,8 @@ import android.util.Log;
 import android.util.Pair;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Random;
 
 /**
@@ -28,7 +30,13 @@ public class Map implements remotesister.Callback{
     private int movehorizonal;
     private int movevertical;
 
+    // 座標を示すPair<Integer x, Integer y>と宝箱のマップ
+    private java.util.Map<Pair<Integer, Integer>, Chest> chests;
+    private final int MAX_CHESTS = 16;
 
+    // 全てのアイテム
+    private List<Item> items;
+    private final int MAX_ITEMS = 4;
 
     private Handler.Callback callback;
     public void setCallback(Handler.Callback callback) {
@@ -46,10 +54,26 @@ public class Map implements remotesister.Callback{
         horizontalBlockNum = horizontalBlockNum+3;
         verticalBlockNum=verticalBlockNum+3;
 
+        this.chests = new HashMap<Pair<Integer, Integer>, Chest>(MAX_CHESTS);
+        this.items = new ArrayList<Item>(MAX_ITEMS);
+
         createMap();
 
+        loadItems();
+        generateChests();
     }
 
+    public java.util.Map<Pair<Integer, Integer>, Chest> getChests() {
+        return chests;
+    }
+
+    public List<Item> getItems() {
+        return items;
+    }
+
+    public int getBlocksize() {
+        return blocksize;
+    }
 
     //方向はEnumに変換すればいいと思うけどめんどくさい
     private void MapMoveCalc(int direction) {
@@ -289,6 +313,54 @@ public class Map implements remotesister.Callback{
 
             }
         }
+    }
+
+    /**
+     * アイテム情報をロード
+     */
+    private void loadItems() {
+        // TODO: 将来的には外部定義ファイルから読み込む感じ
+        this.items.add(new Item(0, "薬草"));
+        this.items.add(new Item(1, "うまのふん"));
+        this.items.add(new BagOfGold(2, "100G", 100));
+        this.items.add(new BagOfGold(3, "1000G", 1000));
+    }
+
+    /**
+     * 全てのアイテムの中からランダムに一つアイテムを得る。
+     * @return Itemオブジェクト
+     */
+    private Item selectRandomItem() {
+        // TODO: 将来的には確率でアイテムのレア度を分ける
+        Random random = new Random();
+        return this.items.get(random.nextInt(this.items.size()));
+    }
+
+    /**
+     * マップ上にランダムに宝箱を配置する
+     */
+    private void generateChests() {
+        Random random = new Random();
+        for (int i = 0; i < MAX_CHESTS; i++) {
+            Item item = selectRandomItem();
+            int x = random.nextInt(horizontalBlockNum);
+            int y = random.nextInt(verticalBlockNum);
+            this.chests.put(new Pair<Integer, Integer>(x, y), new Chest(x, y, item));
+        }
+    }
+
+    /**
+     * 指定した座標にある宝箱を開け、中にあるアイテムを返す
+     * 宝箱がない場合や多寡空箱が開いている場合はnullを返す
+     * @param x マップ上のX座標
+     * @param y マップ上のY座標
+     * @return 宝箱の中身を示すItemオブジェクト。空の場合はnull
+     */
+    public Item openChest(int x, int y) {
+        Chest chest = this.chests.get(new Pair<Integer, Integer>(x, y));
+        Item item = null;
+        if (chest != null) item = chest.open();
+        return item;
     }
 
     void drawMap(Canvas canvas) {
