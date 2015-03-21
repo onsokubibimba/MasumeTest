@@ -16,8 +16,14 @@ public class remotesister {
 
     private int blocksize;
     private int movesize;
+
+    private int movesizeX;
+    private int movesizeY;
+    private int movesizeXmod;
+    private int movesizeYmod;
+
     private int MOVECOUNT = 0;
-    private int movetimes = 4;
+    private int movetimes = 6;
 
     private int horizontalBlockNum;
     private int verticalBlockNum;
@@ -32,8 +38,11 @@ public class remotesister {
 
     public interface Callback {
         //public int[] getDrawpoint(remotesister oneesan);
-        public boolean canMoveOneesan(int fromX ,int fromY,int direction);
-        public boolean canMoveMap(int fromX ,int fromY,int direction);
+        //public boolean canMoveOneesan(int fromX ,int fromY,int direction);
+        //public boolean canMoveMap(int fromX ,int fromY,int direction);
+
+        public int[] canMoveOneesan(int fromX ,int fromY,int direction);
+        public int[] canMoveMap(int fromX ,int fromY,int direction);
     }
     private final Callback callback;
 
@@ -43,11 +52,19 @@ public class remotesister {
         charabitmap = bit;
 
         blocksize = bs;
+
+
+/*
+        horizontalBlockNum = 4;
+        verticalBlockNum = 1;
+
+        horizontalPoint=0;
+        verticalPoint=0;
+        */
+        movesize =(blocksize) / movetimes;
+
         horizontalBlockNum = vw / blocksize;
         verticalBlockNum = vh / blocksize;
-
-        movesize =(blocksize) / movetimes;
-Log.v("1回あたりの動き","サイズ" + movesize);
 
         if (horizontalBlockNum % 2 == 0) {
             horizontalPoint = (horizontalBlockNum / 2) - 1;
@@ -60,6 +77,7 @@ Log.v("1回あたりの動き","サイズ" + movesize);
         } else {
             verticalPoint = ((verticalBlockNum+1) / 2) - 1;
         }
+
 
         int rectleft = horizontalPoint * blocksize;
         int recttop = verticalPoint * blocksize;
@@ -77,8 +95,22 @@ Log.v("1回あたりの動き","サイズ" + movesize);
         //int[] drawpoints = callback.getDrawpoint(this);
 
         // 描画元の矩形イメージ（bitmap内の位置）
-        Rect src = new Rect(rotateint * blocksize,oneesandirection * blocksize
-                ,(rotateint + 1) * blocksize,(oneesandirection + 1) * blocksize);
+
+        //斜め対応 左上、右上は上、左下、右下は下にする
+        int drawdirection;
+        if (oneesandirection == directionEnum.leftup.directionkey()
+                || oneesandirection == directionEnum.rightup.directionkey()) {
+            drawdirection = directionEnum.up.directionkey();
+        } else if (oneesandirection == directionEnum.leftdown.directionkey()
+                    || oneesandirection == directionEnum.rightdown.directionkey()) {
+                drawdirection = directionEnum.down.directionkey();
+        } else {
+                drawdirection = oneesandirection;
+            }
+        Rect src = new Rect(rotateint * blocksize,drawdirection * blocksize
+                  ,(rotateint + 1) * blocksize,(drawdirection + 1) * blocksize);
+        //Rect src = new Rect(rotateint * blocksize,oneesandirection * blocksize
+        //       ,(rotateint + 1) * blocksize,(oneesandirection + 1) * blocksize);
         // 描画先の矩形イメージ（画面表示位置・サイズ）
 
         //rect.set(drawpoints[1],drawpoints[2],drawpoints[3],drawpoints[4]);
@@ -100,23 +132,54 @@ Log.v("1回あたりの動き","サイズ" + movesize);
     public boolean movemap(boolean isMoving,int direction) {
         oneesandirection = direction;
         if (isMoving) {
-            boolean isCanMove = callback.canMoveMap(horizontalPoint, verticalPoint, direction);
-            if (!isCanMove) {
+            //boolean isCanMove = callback.canMoveMap(horizontalPoint, verticalPoint, direction);
+            //if (!isCanMove) {
+
+            int[] isCanMove = callback.canMoveMap(horizontalPoint, verticalPoint, direction);
+            if (isCanMove == null) {
                 return false;
             }
         }
         return isMoving;
     }
 
-    public boolean move(boolean isMoving,int direction) {
+    public void setmovesize(int toX,int toY) {
+
+        movesizeX = (toX - this.rect.left) / movetimes;
+        movesizeY = (toY - this.rect.top) / movetimes;
+
+
+        //int aaa = Math.abs(movesizeX);
+        int aaa = movesizeX;
+
+
+
+        movesizeXmod = toX - this.rect.left - (aaa * movetimes);
+        //if (movesizeX < 0) {
+        //    movesizeXmod = -movesizeXmod;
+        //}
+        Log.v("移動","移動元X:" + this.rect.left + "移動先X:" + toX + "移動値X:" + movesizeX + "移動先余り:" + movesizeXmod );
+
+        //aaa = Math.abs(movesizeY);
+        aaa = movesizeY;
+        movesizeYmod = toY - this.rect.top - (aaa * movetimes);
+        //if (movesizeY < 0) {
+        //    movesizeYmod = -movesizeYmod;
+        //}
+        Log.v("移動","移動元Y:" + this.rect.top + "移動先Y:" + toY + "移動値Y:" + movesizeY + "移動先余り:" + movesizeYmod );
+
+    }
+
+    //public boolean move(boolean isMoving,int direction) {
+    public boolean move(int direction,int toSellX,int toSellY) {
         oneesandirection = direction;
-        if (isMoving) {
 
-            boolean isCanMove = callback.canMoveOneesan(horizontalPoint,verticalPoint,direction);
-            if (!isCanMove) {
-                return false;
-            }
+        //boolean isCanMove = callback.canMoveOneesan(horizontalPoint,verticalPoint,direction);
+        //if (!isCanMove) {
 
+        rect.offset(movesizeX, movesizeY);
+
+        /*
             switch (oneesandirection) {
                 //0:下 1:左 2:右 3:上
                 case 0:
@@ -150,8 +213,13 @@ Log.v("1回あたりの動き","サイズ" + movesize);
                     rect.offset(0,-movesize);
                     break;
             }
-            MOVECOUNT++;
-            if (MOVECOUNT == movetimes) {
+        */
+        MOVECOUNT++;
+        if (MOVECOUNT == movetimes) {
+            rect.offset(movesizeXmod, movesizeYmod);
+            horizontalPoint = toSellX;
+            verticalPoint = toSellY;
+                /*
                 switch (oneesandirection) {
                     //0:下 1:左 2:右 3:上
                     case 0:
@@ -167,12 +235,13 @@ Log.v("1回あたりの動き","サイズ" + movesize);
                         verticalPoint--;
                         break;
                 }
-                MOVECOUNT = 0;
-                return false;
-            }
+                */
 
+            MOVECOUNT = 0;
+            return false;
         }
-        return isMoving;
+
+        return true;
     }
 
 
@@ -187,5 +256,17 @@ Log.v("1回あたりの動き","サイズ" + movesize);
 
     public int getVerticalPoint() {
         return verticalPoint;
+    }
+
+    public void setHorizontalPoint(int x) {
+        horizontalPoint = x;
+    }
+
+    public void setVertivalPoint(int y) {
+        verticalPoint = y;
+    }
+
+    public void setDirection(int direction) {
+        oneesandirection = direction;
     }
 }

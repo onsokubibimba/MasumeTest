@@ -67,11 +67,10 @@ public class MainActivity extends ActionBarActivity {
                 @Override
                 public void onClick(View v) {
                     if (!gv.isMoving) {
-                        gv.direction = 3;
+                        gv.direction = directionEnum.up.directionkey();
                         gv.isMoving = true;
                     }
                     checkChest();
-
                 }
             });
 
@@ -80,11 +79,10 @@ public class MainActivity extends ActionBarActivity {
                 @Override
                 public void onClick(View v) {
                     if (!gv.isMoving) {
-                        gv.direction = 0;
+                        gv.direction = directionEnum.down.directionkey();
                         gv.isMoving = true;
                     }
                     checkChest();
-
                 }
             });
 
@@ -93,7 +91,7 @@ public class MainActivity extends ActionBarActivity {
                 @Override
                 public void onClick(View v) {
                     if (!gv.isMoving) {
-                        gv.direction = 1;
+                        gv.direction = directionEnum.left.directionkey();
                         gv.isMoving = true;
                     }
                     checkChest();
@@ -105,7 +103,55 @@ public class MainActivity extends ActionBarActivity {
                 @Override
                 public void onClick(View v) {
                     if (!gv.isMoving) {
-                        gv.direction = 2;
+                        gv.direction = directionEnum.right.directionkey();
+                        gv.isMoving = true;
+                    }
+                    checkChest();
+                }
+            });
+
+            Button btn5 = (Button)findViewById(R.id.button_rightup);
+            btn5.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (!gv.isMoving) {
+                        gv.direction = directionEnum.rightup.directionkey();
+                        gv.isMoving = true;
+                    }
+                    checkChest();
+                }
+            });
+
+            Button btn6 = (Button)findViewById(R.id.button_rightdown);
+            btn6.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (!gv.isMoving) {
+                        gv.direction = directionEnum.rightdown.directionkey();
+                        gv.isMoving = true;
+                    }
+                    checkChest();
+                }
+            });
+
+            Button btn7 = (Button)findViewById(R.id.button_leftdown);
+            btn7.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (!gv.isMoving) {
+                        gv.direction = directionEnum.leftdown.directionkey();
+                        gv.isMoving = true;
+                    }
+                    checkChest();
+                }
+            });
+
+            Button btn8 = (Button)findViewById(R.id.button_leftup);
+            btn8.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (!gv.isMoving) {
+                        gv.direction = directionEnum.leftup.directionkey();
                         gv.isMoving = true;
                     }
                     checkChest();

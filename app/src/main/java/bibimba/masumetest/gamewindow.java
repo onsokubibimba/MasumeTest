@@ -33,12 +33,19 @@ public class gamewindow extends SurfaceView implements SurfaceHolder.Callback{
             {0, -1}, // down
             {-1, 0}, // left
             {1, 0}, // right
-            {0, 1}  // up
+            {0, 1},  // up
+            {-1, -1}, // leftup
+            {1, -1}, // rightup
+            {-1, 1}, // leftdown
+            {1, 1}  // rightdown
     };
 
     public boolean isMoving;
+    private boolean nowMoving;
 
     public static int movetype;
+
+    private int[] movetosell;
 
     //private Handler.Callback callback;
     //public void setCallback(Handler.Callback callback) {
@@ -146,49 +153,68 @@ public class gamewindow extends SurfaceView implements SurfaceHolder.Callback{
             this.chestBitmaps[1] = BitmapFactory.decodeResource(getResources(), R.drawable.chest_opened);
         }
 
-        boolean rt;
+        boolean rt = false;
 
         if (movetype == 0) {
             //こちらが有効だとおねえさんが動く
-            rt = oneesan.move(isMoving,direction);
+            if (isMoving) {
+                if (!nowMoving) {
+                    movetosell = map.canMoveOneesan(oneesan.getHorizontalPoint(),oneesan.getVerticalPoint(),direction);
+                    if (movetosell == null) {
+                        isMoving = false;
+                    } else {
+                        nowMoving = true;
+                        int[] unko = map.getBlockPosition(movetosell[0],movetosell[1]);
+                        oneesan.setmovesize(unko[0],unko[1]);
+                    }
+
+                } else {
+                    isMoving = oneesan.move(direction,movetosell[0],movetosell[1]);
+                    nowMoving = isMoving;
+                }
+            }
+
+
         } else {
             //こっちが有効だとマップが動く
-            rt = oneesan.movemap(isMoving,direction);
-            isMoving = rt;
+
             if (isMoving) {
-                rt = map.MapMove(isMoving,direction);
-                if (!rt) {
-                    switch (direction) {
-                        //0:下 1:左 2:右 3:上
-                        case 0:
-                            oneesan.verticalPoint++;
-                            break;
-                        case 1:
-                            oneesan.horizontalPoint--;
-                            break;
-                        case 2:
-                            oneesan.horizontalPoint++;
-                            break;
-                        case 3:
-                            oneesan.verticalPoint--;
-                            break;
+                if (!nowMoving) {
+                    movetosell = map.canMoveMap(oneesan.getHorizontalPoint(),oneesan.getVerticalPoint(),direction);
+                    if (movetosell == null) {
+                        isMoving = false;
+                    } else {
+                        nowMoving = true;
+
+                        int[] unko2 = map.getBlockPosition(movetosell[0],movetosell[1]);
+                        int[] unko3 = map.getBlockPosition(oneesan.getHorizontalPoint(),oneesan.getVerticalPoint());
+                        map.MapMoveCalc(unko2[0],unko2[1],unko3[0],unko3[1]);
+                        oneesan.setDirection(direction);
+                    }
+                } else {
+                    boolean isMoveEnd = map.MapMove(direction,movetosell[0],movetosell[1]);
+
+                    if (!isMoveEnd) {
+                        oneesan.setHorizontalPoint(movetosell[0]);
+                        oneesan.setVertivalPoint(movetosell[1]);
+                        isMoving = false;
+                        nowMoving = false;
                     }
                 }
             }
+
         }
 
-        isMoving = rt;
 
         map.drawMap(canvas);
         drawChests(canvas);
         oneesan.draw(canvas);
 
+
         if (!isMoving) {
-            ArrayList<Pair> arpair = map.getmovetolist(oneesan.horizontalPoint,oneesan.verticalPoint);
-            arrows.drawArrow(canvas,arpair,oneesan.horizontalPoint,oneesan.verticalPoint,
+            ArrayList<Integer[]> arpair = map.getmovetolist(oneesan.getHorizontalPoint(),oneesan.getVerticalPoint());
+            arrows.drawArrow(canvas,arpair,oneesan.getHorizontalPoint(),oneesan.getVerticalPoint(),
                     oneesan.rect.left,oneesan.rect.top);
-
-
         }
 
     }
@@ -196,8 +222,13 @@ public class gamewindow extends SurfaceView implements SurfaceHolder.Callback{
     private void drawChests(Canvas canvas) {
         Rect rectSrc = new Rect(0, 0, this.chestBitmaps[0].getWidth(), this.chestBitmaps[0].getHeight());
         for (Chest chest : this.map.getChests().values()) {
-            int x = chest.getX() * this.map.getBlocksize();
-            int y = chest.getY() * this.map.getBlocksize();
+
+            //map.getBlockPosition
+            int[] pos = map.getBlockPosition(chest.getX(),chest.getY());
+            int x = pos[0];
+            int y = pos[1];
+            //int x = chest.getX() * this.map.getBlocksize();
+            //int y = chest.getY() * this.map.getBlocksize();
             Rect rectDest = new Rect(x, y, x + this.map.getBlocksize(), y + this.map.getBlocksize());
             canvas.drawBitmap(this.chestBitmaps[chest.getState()], rectSrc, rectDest, null);
         }
@@ -219,6 +250,7 @@ public class gamewindow extends SurfaceView implements SurfaceHolder.Callback{
             return null;
         }
     }
+
 
 
     @Override

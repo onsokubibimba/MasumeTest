@@ -7,7 +7,7 @@
 
     <SurfaceView
         android:layout_width="fill_parent"
-        android:layout_height="300dp"
+        android:layout_height="250dp"
         android:id="@+id/gameView"
         android:layout_alignParentTop="true"
         android:layout_alignParentLeft="true"
@@ -18,7 +18,7 @@
     <Button
         style="?android:attr/buttonStyleSmall"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="40dp"
         android:text="↑"
         android:id="@+id/button_up"
         android:layout_below="@+id/gameView"
@@ -27,17 +27,17 @@
     <Button
         style="?android:attr/buttonStyleSmall"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="40dp"
         android:text="↓"
         android:id="@+id/button_down"
-        android:layout_alignTop="@+id/button_left"
-        android:layout_alignLeft="@+id/button_up"
-        android:layout_alignStart="@+id/button_up" />
+        android:layout_below="@+id/button_left"
+        android:layout_toRightOf="@+id/button_leftup"
+        android:layout_toEndOf="@+id/button_leftup" />
 
     <Button
         style="?android:attr/buttonStyleSmall"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="40dp"
         android:text="←"
         android:id="@+id/button_left"
         android:layout_below="@+id/button_up"
@@ -47,7 +47,7 @@
     <Button
         style="?android:attr/buttonStyleSmall"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="40dp"
         android:text="→"
         android:id="@+id/button_right"
         android:layout_below="@+id/button_up"
@@ -66,6 +66,47 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true" />
 
+
+    <Button
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="40dp"
+        android:text="左上"
+        android:id="@+id/button_leftup"
+        android:layout_above="@+id/button_left"
+        android:layout_toLeftOf="@+id/button_up"
+        android:layout_toStartOf="@+id/button_up" />
+
+    <Button
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="40dp"
+        android:text="右上"
+        android:id="@+id/button_rightup"
+        android:layout_above="@+id/button_right"
+        android:layout_alignLeft="@+id/button_right"
+        android:layout_alignStart="@+id/button_right" />
+
+    <Button
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="40dp"
+        android:text="右下"
+        android:id="@+id/button_rightdown"
+        android:layout_above="@+id/MoveTypeSwitch"
+        android:layout_toRightOf="@+id/button_down"
+        android:layout_toEndOf="@+id/button_down" />
+
+    <Button
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="40dp"
+        android:text="左下"
+        android:id="@+id/button_leftdown"
+        android:layout_above="@+id/MoveTypeSwitch"
+        android:layout_toLeftOf="@+id/button_down"
+        android:layout_toStartOf="@+id/button_down" />
+
     <ScrollView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -74,12 +115,11 @@
         android:layout_centerHorizontal="true"
         android:layout_below="@+id/MoveTypeSwitch">
 
-    <ListView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/lvLog"
-        android:layout_alignBottom="@+id/scrollView"
-        android:layout_centerHorizontal="true" />
-
-</ScrollView>
+        <ListView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/lvLog"
+            android:layout_alignBottom="@+id/scrollView"
+            android:layout_centerHorizontal="true" />
+    </ScrollView>
 </RelativeLayout>
